@@ -25,6 +25,14 @@ const ProtectedRoute: React.FC = () => {
     return isAuthenticated ? <Outlet /> : <Navigate to="/auth" replace />;
 };
 
+const HomeOrAuth: React.FC = () => {
+    const { isAuthenticated } = useAuth();
+    if (!isAuthenticated) {
+        return <Navigate to="/auth" replace />;
+    }
+    return <HomePage />;
+};
+
 
 const App: React.FC = () => {
     return (
@@ -36,7 +44,7 @@ const App: React.FC = () => {
                             <Header />
                             <main className="flex-grow">
                                 <Routes>
-                                    <Route path="/" element={<HomePage />} />
+                                    <Route path="/" element={<HomeOrAuth />} />
                                     <Route path="/product/:id" element={<ProductDetailPage />} />
                                     <Route path="/auth" element={<AuthPage />} />
                                     

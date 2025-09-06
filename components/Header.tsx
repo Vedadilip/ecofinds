@@ -43,14 +43,17 @@ export const Header: React.FC = () => {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     <Link to="/" className="flex items-center space-x-2">
-                        <span className="text-2xl font-bold text-text-primary">Logo</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.344a5.5 5.5 0 018.822-1.83l-1.344 1.344A3.5 3.5 0 006.5 10H8v1.5a2.5 2.5 0 105 0V10h1.5a5.5 5.5 0 11-10.668-1.656z" />
+                        </svg>
+                        <span className="text-2xl font-bold text-text-primary">EcoFinds</span>
                     </Link>
                     
-                    <nav className="hidden md:flex items-center space-x-6">
-                       {navLinks}
-                    </nav>
-
                     <div className="flex items-center space-x-4">
+                        <nav className="hidden md:flex items-center space-x-6">
+                           {navLinks}
+                        </nav>
+
                          <Link to="/cart" className="relative text-gray-600 hover:text-primary">
                             <CartIcon />
                             {cart.length > 0 && (
@@ -68,7 +71,7 @@ export const Header: React.FC = () => {
                             </Link>
                         ) : (
                             // Use an empty div to reserve space and prevent layout shifts
-                           <div className="h-9 w-9"></div>
+                           <div className="hidden md:block h-9 w-9"></div>
                         )}
 
                          <div className="md:hidden">

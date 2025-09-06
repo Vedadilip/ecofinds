@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../hooks/useData';
-import { Category, Product } from '../types';
+import { Product, Category } from '../types';
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => (
     <Link to={`/product/${product.id}`} className="group block bg-surface rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105">
@@ -15,21 +15,37 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => (
     </Link>
 );
 
-
 export const HomePage: React.FC = () => {
     const { products } = useData();
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('All');
+    const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all');
+    const [sortBy, setSortBy] = useState<'default' | 'price-asc' | 'price-desc'>('default');
+
 
     const filteredProducts = useMemo(() => {
-        return products.filter(product => {
-            const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-            const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesCategory && matchesSearch;
-        });
-    }, [products, searchTerm, selectedCategory]);
+        let tempProducts = [...products];
 
-    const categories = ['All', ...Object.values(Category)];
+        if (searchTerm.trim()) {
+            const lowercasedTerm = searchTerm.toLowerCase();
+            tempProducts = tempProducts.filter(product =>
+                product.title.toLowerCase().includes(lowercasedTerm) ||
+                product.description.toLowerCase().includes(lowercasedTerm)
+            );
+        }
+        
+        if (selectedCategory !== 'all') {
+            tempProducts = tempProducts.filter(product => product.category === selectedCategory);
+        }
+
+        if (sortBy === 'price-asc') {
+            tempProducts.sort((a, b) => a.price - b.price);
+        } else if (sortBy === 'price-desc') {
+            tempProducts.sort((a, b) => b.price - a.price);
+        }
+
+        return tempProducts;
+    }, [products, searchTerm, selectedCategory, sortBy]);
+
 
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -38,23 +54,46 @@ export const HomePage: React.FC = () => {
                 <p className="text-lg text-text-secondary">Your sustainable marketplace for pre-loved treasures.</p>
             </div>
 
-            <div className="mb-8 flex flex-col md:flex-row gap-4">
-                <input
-                    type="text"
-                    placeholder="Search for items..."
-                    className="w-full md:flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <select
-                    className="w-full md:w-auto p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value as Category | 'All')}
-                >
-                    {categories.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                </select>
+            <div className="bg-surface p-4 rounded-lg shadow-md mb-8 flex flex-col md:flex-row gap-4 items-center">
+                <div className="w-full md:flex-1">
+                     <input
+                        type="text"
+                        placeholder="Search by title..."
+                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        aria-label="Search for products"
+                    />
+                </div>
+                <div className="flex w-full md:w-auto gap-4">
+                    <div className="flex-1">
+                        <label htmlFor="category-filter" className="sr-only">Filter by Category</label>
+                        <select
+                            id="category-filter"
+                            value={selectedCategory}
+                            onChange={e => setSelectedCategory(e.target.value as Category | 'all')}
+                             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
+                        >
+                            <option value="all">All Categories</option>
+                            {Object.values(Category).map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex-1">
+                        <label htmlFor="sort-by" className="sr-only">Sort by</label>
+                        <select
+                            id="sort-by"
+                            value={sortBy}
+                            onChange={e => setSortBy(e.target.value as typeof sortBy)}
+                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
+                        >
+                            <option value="default">Sort By</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             {filteredProducts.length > 0 ? (
